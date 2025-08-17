@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0a0a0a" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<title>Sets + Finishers</title>
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --panel:#121212;
+    --panel-2:#161616;
+    --ink:#f5f5f5;
+    --muted:#b3b3b3;
+    --border:#2a2a2a;
+
+    --red:#e11d2e;
+    --red-dark:#9f0f1e;
+    --red-glow:rgba(225,29,46,.35);
+
+    --danger:#ff4d4d;
+    --radius:16px;
+
+    --box:#0f0f0f;
+    --box-border:#3c3c3c;
+    --box-checked:#2a0e11;
+    --focus:#ffffff;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;color:var(--ink);
+    background:
+      radial-gradient(1100px 700px at 85% -10%, rgba(225,29,46,.12), transparent 60%),
+      linear-gradient(180deg,#0b0b0b 0%, #0a0a0a 100%);
+    font-family: Inter, ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing:antialiased; line-height:1.45;
+  }
+
+  .wrap{max-width:980px;margin:26px auto;padding:16px}
+  header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .title{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:.2px}
+  .mark{width:16px;height:16px;background:linear-gradient(180deg,var(--red),#ff3b47);
+        clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);
+        filter:drop-shadow(0 0 6px var(--red-glow))}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .pill{display:inline-flex;align-items:center;gap:8px;background:var(--panel-2);border:1.5px solid var(--border);
+        color:var(--ink);border-radius:999px;padding:8px 12px;font-size:13px}
+  .pill strong{font-weight:800;color:#fff}
+  button,.btn{background:var(--panel-2);border:1.5px solid var(--border);color:var(--ink);
+        border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer;font-size:14px}
+  button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  button:hover{border-color:#3f3f3f}
+  .btn-accent{background:linear-gradient(180deg,#1c1c1c,#1a1a1a);border-color:#2b2b2b}
+  .btn-danger{background:linear-gradient(180deg,#260a0d,#1a0608);border-color:#3a0c12;color:#ffd7d7}
+
+  .panel{background:linear-gradient(180deg,#151515,#111111);border:1.5px solid var(--border);border-radius:var(--radius);
+         box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);overflow:hidden;margin-bottom:16px}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1.5px solid var(--border)}
+  .panel-title{font-weight:900;letter-spacing:.2px}
+  .subtle{color:var(--muted);font-size:12px}
+
+  .thead{display:grid;grid-template-columns:220px 1fr 120px;gap:0;border-bottom:1.5px solid var(--border);
+         padding:10px 14px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.12em}
+  .row{display:grid;grid-template-columns:220px 1fr 120px;gap:0;align-items:center;padding:12px 14px;border-bottom:1px dashed #2f2f2f}
+  .row:last-child{border-bottom:none}
+  .name{font-weight:800}
+  .checks{display:flex;flex-wrap:wrap;gap:10px}
+
+  .check{
+    width:36px;height:36px;display:inline-grid;place-items:center;border-radius:10px;
+    background:var(--box);border:2px solid var(--box-border);
+    cursor:pointer;user-select:none;touch-action:manipulation;
+    transition:transform .06s ease, box-shadow .06s ease, border-color .06s ease, background-color .06s ease;
+  }
+  .check:active{transform:scale(.96)}
+  .check .glyph{font-weight:900;font-size:20px;line-height:1;color:#fff}
+  .check.checked{
+    background:linear-gradient(180deg,#3a0d12,#25090c);
+    border-color:var(--red);
+    box-shadow:0 0 0 3px var(--red-glow) inset, 0 0 0 1px rgba(255,255,255,.05);
+  }
+
+  footer{margin-top:10px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+  .meter{flex:1;min-width:240px;background:var(--panel);border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;display:grid;gap:10px}
+  .bar{height:12px;border-radius:999px;background:#0e0e0e;border:1.5px solid var(--border);overflow:hidden}
+  .bar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,#9ca3af,#ef4444,#ef4444);transition:width .2s ease}
+  .numbers{display:flex;justify-content:space-between;font-weight:900}
+
+  .fin-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .date-ctrl{display:inline-flex;gap:8px;align-items:center;background:var(--panel-2);border:1.5px solid var(--border);
+             border-radius:12px;padding:8px 10px}
+  .date-ctrl button{padding:6px 9px;border-radius:10px}
+  .date-label{font-weight:800}
+  .tag{display:inline-flex;gap:6px;align-items:center;border:1.5px solid var(--border);background:var(--panel-2);
+       border-radius:999px;padding:6px 10px;font-size:12px;color:var(--muted)}
+  .tag .dot{width:9px;height:9px;border-radius:50%;background:var(--red);box-shadow:0 0 10px var(--red-glow)}
+  .tag.active{color:#fff;border-color:#5a141b;background:linear-gradient(180deg,#2a0f13,#1b0a0d)}
+  @media (max-width:720px){.thead,.row{grid-template-columns:1fr}.mini{text-align:left}}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title"><span class="mark"></span> Sets + Finishers</div>
+      <div class="controls">
+        <div class="pill">Week starting: <strong id="weekLabel"></strong></div>
+        <button class="btn" id="prevWeek">Prev</button>
+        <button class="btn" id="thisWeek">This Week</button>
+        <button class="btn" id="nextWeek">Next</button>
+        <button class="btn" id="exportCsv">Export CSV</button>
+      </div>
+    </header>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Weekly Sets</div>
+        <div class="subtle">Tap boxes to mark sets. Progress = total sets completed.</div>
+      </div>
+      <div class="thead"><div>Body part</div><div>Sets</div><div>Done</div></div>
+      <div id="mainRows"></div>
+      <footer>
+        <div class="meter">
+          <div class="numbers">
+            <div><span id="mainDoneCount">0</span>/<span id="mainTotalCount">0</span> sets</div>
+            <div id="mainPctLabel">0%</div>
+          </div>
+          <div class="bar"><span id="mainBarFill"></span></div>
+        </div>
+        <button class="btn-danger" id="resetMain">Reset Main</button>
+      </footer>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Daily Finishers</div>
+        <div class="fin-controls">
+          <div class="date-ctrl">
+            <button class="btn" id="prevDay">◀︎</button>
+            <div class="date-label" id="dayLabel"></div>
+            <button class="btn" id="nextDay">▶︎</button>
+          </div>
+          <button class="btn-accent" id="todayBtn">Today</button>
+          <span class="subtle">Toggle the red tag to mark a finisher performed on this date.</span>
+        </div>
+      </div>
+      <div class="thead"><div>Finisher</div><div>Checks</div><div>Today</div></div>
+      <div id="finisherRows"></div>
+      <footer>
+        <div class="meter">
+          <div class="numbers">
+            <div><span id="finDoneCount">0</span>/<span id="finTotalCount">0</span> checks</div>
+            <div id="finPctLabel">0%</div>
+          </div>
+          <div class="bar"><span id="finBarFill"></span></div>
+        </div>
+        <button class="btn-danger" id="resetFinishers">Reset Finishers</button>
+      </footer>
+    </section>
+  </div>
+
+<script>
+const MAIN_DEFAULTS = [
+  { id:"chest",     name:"Chest",     sets:12 },
+  { id:"back",      name:"Back",      sets:12 },
+  { id:"shoulders", name:"Shoulders", sets:12 },
+  { id:"biceps",    name:"Biceps",    sets:12 },
+  { id:"triceps",   name:"Triceps",   sets:12 },
+  { id:"hamstrings",name:"Hamstrings",sets:12 },
+  { id:"quads",     name:"Quads",     sets:12 },
+  { id:"calves",    name:"Calves",    sets:12 },
+];
+const FINISHER_DEFAULTS = [
+  { id:"abs",       name:"Abs",        sets:14 },
+  { id:"wrists",    name:"Wrists",     sets:14 },
+  { id:"neck",      name:"Neck",       sets:18 },
+  { id:"f-chest",   name:"Chest",      sets:1  },
+  { id:"f-back",    name:"Back",       sets:1  },
+  { id:"f-biceps",  name:"Biceps",     sets:1  },
+  { id:"f-triceps", name:"Triceps",    sets:1  },
+  { id:"f-hams",    name:"Hamstrings", sets:1  },
+  { id:"f-quads",   name:"Quads",      sets:1  },
+];
+
+function startOfWeek(d=new Date()){ const t=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  const day=(t.getDay()+6)%7; t.setDate(t.getDate()-day); t.setHours(0,0,0,0); return t; }
+function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+function fmtISO(d){ return d.toISOString().slice(0,10); }
+function fmtWeekLabel(d){ return d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}); }
+function fmtDayLabel(d){ return d.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}); }
+
+let currentWeek = startOfWeek(new Date());
+let selectedDay = new Date();
+
+function keyForWeek(d){ return `sets-tracker-pwa-red::${fmtISO(startOfWeek(d))}`; }
+function loadWeek(d){
+  const raw = localStorage.getItem(keyForWeek(d));
+  if(!raw){
+    return { main:{parts:structuredClone(MAIN_DEFAULTS),checks:{}},
+             fin:{parts:structuredClone(FINISHER_DEFAULTS),checks:{}},
+             finDaily:{} };
+  }
+  try{
+    const p=JSON.parse(raw);
+    if(!p.main) p.main={parts:structuredClone(MAIN_DEFAULTS),checks:{}};
+    if(!p.fin)  p.fin ={parts:structuredClone(FINISHER_DEFAULTS),checks:{}};
+    if(!p.finDaily) p.finDaily={};
+    return p;
+  }catch{
+    return { main:{parts:structuredClone(MAIN_DEFAULTS),checks:{}},
+             fin:{parts:structuredClone(FINISHER_DEFAULTS),checks:{}},
+             finDaily:{} };
+  }
+}
+function saveWeek(d,data){ localStorage.setItem(keyForWeek(d), JSON.stringify(data)); }
+let weekData = loadWeek(currentWeek);
+
+const weekLabel = document.getElementById('weekLabel');
+const mainRowsEl = document.getElementById('mainRows');
+const finRowsEl  = document.getElementById('finisherRows');
+const mainDoneEl = document.getElementById('mainDoneCount');
+const mainTotEl  = document.getElementById('mainTotalCount');
+const mainPctEl  = document.getElementById('mainPctLabel');
+const mainBarEl  = document.getElementById('mainBarFill');
+const finDoneEl  = document.getElementById('finDoneCount');
+const finTotEl   = document.getElementById('finTotalCount');
+const finPctEl   = document.getElementById('finPctLabel');
+const finBarEl   = document.getElementById('finBarFill');
+const dayLabelEl = document.getElementById('dayLabel');
+
+function ensureChecks(section, part){
+  const store = weekData[section].checks;
+  if(!store[part.id]) store[part.id] = Array.from({length: part.sets}, ()=>false);
+  const arr = store[part.id];
+  if(arr.length < part.sets) for(let i=arr.length;i<part.sets;i++) arr.push(false);
+  if(arr.length > part.sets) arr.length = part.sets;
+  return arr;
+}
+
+function makeCheckbox(val, onToggle){
+  const box=document.createElement('div'); box.className='check'+(val?' checked':''); box.setAttribute('role','checkbox'); box.tabIndex=0; box.setAttribute('aria-checked', String(val));
+  const input=document.createElement('input'); input.type='checkbox'; input.checked=val;
+  const glyph=document.createElement('div'); glyph.className='glyph'; glyph.textContent = val ? '✓' : '';
+  function toggle(next){
+    const newVal = (typeof next === 'boolean') ? next : !input.checked;
+    input.checked = newVal;
+    glyph.textContent = newVal ? '✓' : '';
+    box.classList.toggle('checked', newVal);
+    box.setAttribute('aria-checked', String(newVal));
+    onToggle(newVal);
+  }
+  box.addEventListener('click', ()=>toggle());
+  box.addEventListener('keydown', (e)=>{ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); toggle(); }});
+  box.append(input,glyph);
+  return box;
+}
+
+function buildMain(){
+  mainRowsEl.innerHTML='';
+  weekData.main.parts.forEach(part=>{
+    const arr = ensureChecks('main', part);
+    const row=document.createElement('div'); row.className='row';
+    const left=document.createElement('div'); left.className='name'; left.textContent=part.name;
+    const middle=document.createElement('div'); middle.className='checks';
+    arr.forEach((v,i)=>{
+      const el=makeCheckbox(v,(checked)=>{ weekData.main.checks[part.id][i]=checked; saveWeek(currentWeek,weekData); updateMainTotals(); updMini(); });
+      middle.appendChild(el);
+    });
+    const right=document.createElement('div'); right.className='mini';
+    function updMini(){ const c=(weekData.main.checks[part.id]||[]).filter(Boolean).length; right.textContent=`${c}/${arr.length}`; }
+    updMini();
+    row.append(left,middle,right);
+    mainRowsEl.appendChild(row);
+  });
+  updateMainTotals();
+}
+function updateMainTotals(){
+  let total=0, done=0;
+  weekData.main.parts.forEach(p=>{
+    const arr=weekData.main.checks[p.id]||[]; total += arr.length; done += arr.filter(Boolean).length;
+  });
+  mainTotEl.textContent=total; mainDoneEl.textContent=done;
+  const pct = total ? Math.round(done/total*100) : 0; mainPctEl.textContent=pct+'%'; mainBarEl.style.width=pct+'%';
+}
+
+function buildFinishers(){
+  finRowsEl.innerHTML='';
+  const dayISO = fmtISO(selectedDay);
+  if(!weekData.finDaily[dayISO]) weekData.finDaily[dayISO] = {};
+  const todayMap = weekData.finDaily[dayISO];
+
+  weekData.fin.parts.forEach(part=>{
+    const arr = ensureChecks('fin', part);
+    const row=document.createElement('div'); row.className='row';
+    const left=document.createElement('div'); left.className='name'; left.textContent=part.name;
+    const middle=document.createElement('div'); middle.className='checks';
+    arr.forEach((v,i)=>{
+      const el=makeCheckbox(v,(checked)=>{ weekData.fin.checks[part.id][i]=checked; saveWeek(currentWeek,weekData); updateFinTotals(); });
+      middle.appendChild(el);
+    });
+    const right=document.createElement('div'); right.className='mini';
+    const tag=document.createElement('button');
+    tag.className='tag'+(todayMap[part.id] ? ' active' : '');
+    tag.innerHTML=`<span class="dot"></span> Today`;
+    tag.addEventListener('click',()=>{
+      todayMap[part.id]=!todayMap[part.id]; tag.classList.toggle('active', todayMap[part.id]);
+      row.style.boxShadow = todayMap[part.id] ? 'inset 0 0 0 1px var(--red-glow)' : 'none';
+      saveWeek(currentWeek,weekData);
+    });
+    if(todayMap[part.id]) row.style.boxShadow='inset 0 0 0 1px var(--red-glow)';
+    right.replaceChildren(tag);
+    row.append(left,middle,right);
+    finRowsEl.appendChild(row);
+  });
+  updateFinTotals();
+}
+function updateFinTotals(){
+  let t=0,d=0;
+  weekData.fin.parts.forEach(p=>{
+    const arr=weekData.fin.checks[p.id]||[]; t+=arr.length; d+=arr.filter(Boolean).length;
+  });
+  finTotEl.textContent=t; finDoneEl.textContent=d;
+  const pct = t ? Math.round(d/t*100) : 0; finPctEl.textContent=pct+'%'; finBarEl.style.width=pct+'%';
+}
+
+document.getElementById('prevWeek').addEventListener('click',()=>{ currentWeek=addDays(currentWeek,-7); weekData=loadWeek(currentWeek); rebuildAll(); });
+document.getElementById('nextWeek').addEventListener('click',()=>{ currentWeek=addDays(currentWeek, 7); weekData=loadWeek(currentWeek); rebuildAll(); });
+document.getElementById('thisWeek').addEventListener('click',()=>{ currentWeek=startOfWeek(new Date()); weekData=loadWeek(currentWeek); rebuildAll(); });
+
+document.getElementById('prevDay').addEventListener('click',()=>{ selectedDay=addDays(selectedDay,-1); updateDayLabel(); buildFinishers(); });
+document.getElementById('nextDay').addEventListener('click',()=>{ selectedDay=addDays(selectedDay, 1); updateDayLabel(); buildFinishers(); });
+document.getElementById('todayBtn').addEventListener('click',()=>{ selectedDay=new Date(); updateDayLabel(); buildFinishers(); });
+
+document.getElementById('resetMain').addEventListener('click',()=>{ if(!confirm('Clear all MAIN checkmarks for this week?')) return;
+  Object.keys(weekData.main.checks).forEach(k=>{ weekData.main.checks[k]=weekData.main.checks[k].map(()=>false); });
+  saveWeek(currentWeek,weekData); rebuildAll();
+});
+document.getElementById('resetFinishers').addEventListener('click',()=>{ if(!confirm('Clear all FINISHER checkmarks for this week?')) return;
+  Object.keys(weekData.fin.checks).forEach(k=>{ weekData.fin.checks[k]=weekData.fin.checks[k].map(()=>false); });
+  saveWeek(currentWeek,weekData); rebuildAll();
+});
+document.getElementById('exportCsv').addEventListener('click',()=>{
+  const start=fmtISO(currentWeek);
+  const rows1=[['WeekStart','Section','BodyPart','CheckNumber','Done']];
+  weekData.main.parts.forEach(p=>{ (weekData.main.checks[p.id]||[]).forEach((v,i)=>{ rows1.push([start,'Main',p.name.replace(/,/g,' '),String(i+1),v?'1':'0']); }); });
+  weekData.fin .parts.forEach(p=>{ (weekData.fin .checks[p.id]||[]).forEach((v,i)=>{ rows1.push([start,'Finisher',p.name.replace(/,/g,' '),String(i+1),v?'1':'0']); }); });
+  const rows2=[['Date','BodyPart','HitToday']];
+  Object.keys(weekData.finDaily||{}).sort().forEach(date=>{
+    const map=weekData.finDaily[date];
+    weekData.fin.parts.forEach(p=>{ rows2.push([date,p.name.replace(/,/g,' '), map && map[p.id] ? '1':'0']); });
+  });
+  const csv = rows1.map(r=>r.join(',')).join('\\n') + '\\n\\n' + rows2.map(r=>r.join(',')).join('\\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=`sets-${start}.csv`; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+});
+
+function updateDayLabel(){ dayLabelEl.textContent = fmtDayLabel(selectedDay); }
+function rebuildAll(){ weekLabel.textContent=fmtWeekLabel(currentWeek); updateDayLabel(); buildMain(); buildFinishers(); }
+rebuildAll();
+
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('./service-worker.js'); }); }
+</script>
+</body>
+</html>
